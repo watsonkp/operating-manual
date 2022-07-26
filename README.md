@@ -9,6 +9,13 @@ There are two Docker containers. One contains the PostgreSQL database while the 
 
 To build the containers see `build-db.sh` and `build-api.sh`.
 
+Result of running (docker ps)
+```
+CONTAINER ID   IMAGE                         COMMAND                  CREATED        STATUS        PORTS                       NAMES
+e51150ca1a6d   sulliedeclat/manual-api:0.1   "./api.rb"               8 months ago   Up 8 months   0.0.0.0:4567->4567/tcp      manual-api
+974c58542e13   sulliedeclat/manual-db:0.1    "docker-entrypoint.s…"   8 months ago   Up 8 months   5432/tcp                    manual-db
+```
+
 ## Usage
 Notes are written in markdown. The web application will parse and transform markdown into html.
 
@@ -16,8 +23,3 @@ Notes are written in markdown. The web application will parse and transform mark
 
 ## Development
 Connect directly to the database using a PostgreSQL container running the psql command. See `run-api.sh`.
-
-# When running (docker ps)
-CONTAINER ID   IMAGE                         COMMAND                  CREATED        STATUS        PORTS                       NAMES
-e51150ca1a6d   sulliedeclat/manual-api:0.1   "./api.rb"               8 months ago   Up 8 months   0.0.0.0:4567->4567/tcp      manual-api
-974c58542e13   sulliedeclat/manual-db:0.1    "docker-entrypoint.s…"   8 months ago   Up 8 months   5432/tcp                    manual-db
