@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="/css/platform.css">
+		<script defer src="/js/markdown.js"></script>
+		<script defer src="/js/platform.js"></script>
+	</head>
+	<body>
+		<ul>
+			<li><a href="/platform.html">Platform</a></li>
+			<li><a href="/pages">Pages</a></li>
+			<li><a href="/notes">Notes</a></li>
+			<li><a href="/images">Images</a></li>
+		</ul>
+		<ul>
+			<button id="read" type="button">Read</button>
+			<button id="create" type="button">Create</button>
+			<button id="update" type="button">Update</button>
+		</ul>
+		<div id="index" hidden>
+			<h1>Summary</h1>
+			<!-- TODO: What should go here? -->
+		</div>
+		<div id="note" hidden>
+			<h1>Notes</h1>
+			<table id="note-index">
+			</table>
+			<article id="note-viewer">
+			</article>
+			<form id="note-editor">
+				<label>ID</label>
+				<input type="number" name="id" disabled>
+				<label>Title</label>
+				<input type="text" name="title">
+				<label>Reference</label>
+				<input type="text" name="reference">
+				<label>Content</label>
+				<textarea name="content"></textarea>
+				<label>Tags</label>
+				<input type="text" name="note-tag" disabled>
+				<input type="submit" value="Create">
+				<input type="submit" value="Tag">
+				<input type="submit" value="Update">
+				<input type="submit" value="Delete">
+			</form>
+		</div>
+		<div id="page" hidden>
+			<table id="page-index">
+			</table>
+			<article id="page-viewer">
+			</article>
+			<form id="page-editor">
+				<label>ID</label>
+				<input type="number" name="id" disabled>
+				<label>Title</label>
+				<input type="text" name="title">
+				<label>Content</label>
+				<textarea name="content"></textarea>
+				<input type="submit" value="Create">
+				<input type="submit" value="Update">
+				<input type="submit" value="Delete">
+			</form>
+		</div>
+		<div id="image" hidden>
+			<h1>Images</h1>
+			<table id="image-index">
+			</table>
+			<article id="image-viewer">
+			</article>
+			<form id="image-editor">
+				<label>ID</label>
+				<input type="number" name="id" disabled>
+				<label>Title</label>
+				<input type="text" name="title">
+				<label>File</label>
+				<input type="file" name="data">
+				<input type="submit" value="Create">
+				<input type="submit" value="Update">
+				<input type="submit" value="Delete">
+			</form>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<head>
+	<link rel="stylesheet" href="/css/main.css">
+	<script defer src="/js/notes.js"></script>
+</head>
+<body>
+	<form id='note-form' action='/api/note' method='post'>
+		<label for='note-id'>ID</label>
+		<input id='note-id' name='note-id' type='number' disabled>
+		<label for='title'>Title</label>
+		<input id='title' name='title' type='text'>
+		<label for='reference'>Reference</label>
+		<input id='reference' name='reference' type='text'>
+		<label for='content' class='textbox'>Content</label>
+		<input id='content' name='content' type='text' class='textbox'>
+		<label for='note-tag'>Tags</label>
+		<input id='note-tag' name='note-tag' type='text' disabled>
+		<input id='note-create' type='submit' value='Create'>
+		<input id='note-tag-create' type='submit' value='Tag' hidden>
+	</form>
+</body>

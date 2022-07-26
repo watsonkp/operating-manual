@@ -1,0 +1,75 @@
+body {
+	margin: 1em;
+	color: #202020;
+	background: #e0e0d0;
+}
+
+h1 {
+	font-size: 2.4em;
+}
+
+h2 {
+	margin-bottom: 0.5em;
+	font-size: 1.8em;
+}
+
+h3 {
+	margin-top: 0;
+	margin-bottom: 0.5em;
+	font-size: 1.4em;
+}
+
+h4 {
+}
+
+p {
+	font-size: 1.2em;
+}
+
+a {
+	color: #1818a0;
+	font-weight: normal;
+}
+
+div#creator {
+	display: grid;
+	grid-template-columns: 3fr 1fr;
+}
+
+form:not([hidden]).creator {
+	display: grid;
+	grid-template-columns: 1fr 5fr;
+	grid-template-rows: 1fr 16fr 1fr;
+}
+
+form:not([hidden])#image-creator {
+	display: grid;
+	grid-template-columns: 1fr 4fr;
+	grid-template-rows: 1fr 1fr;
+}
+
+form:not([hidden])#note-editor {
+	display: grid;
+	grid-template-columns: 1fr 5fr;
+	grid-template-rows: 1fr 1fr 1fr 16fr 1fr;
+}
+
+/* hidden is very weak and will be overriden by display */
+form:not([hidden]) {
+/*form {*/
+	display: grid;
+	grid-template-columns: 1fr 4fr;
+	grid-template-rows: 1fr 1fr 16fr 1fr;
+/*	grid-auto-rows: 1em;
+	gap: 1em;*/
+}
+
+/*.textbox {
+	grid-column-start: 2;
+	grid-row-start: 3;
+	grid-row-end: 6;
+}*/
+
+/*form > submit {
+	grid-row-start: 7;
+}*/

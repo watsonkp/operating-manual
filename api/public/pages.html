@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="/css/platform.css">
+		<script defer src="/js/platform.js"></script>
+	</head>
+	<body>
+		<ul>
+			<li><a href="/platform.html">Pages</a></li>
+			<li><a href="/notes.html">Notes</a></li>
+		</ul>
+		<button id="creator-toggle">Create</button>
+		<button id="editor-toggle">Update</button>
+		<button id="note-creator-toggle">Create Note</button>
+		<button id="image-creator-toggle">Create Image</button>
+		<ol id="index" hidden>
+		</ol>
+		<article id="page" hidden>
+			<h2 id="page-title"></h2>
+			<section id="page-section"></section>
+		</article>
+
+		<form id="page-editor" hidden>
+			<label for="page_id">ID</label>
+			<input id="page_id" type="number" name="id" disabled>
+			<label for="title">Title</label>
+			<input id="title" type="text" name="title">
+			<label for="content">Content</label>
+			<textarea id="content" name="content"></textarea>
+			<input type="submit" value="Update">
+		</form>
+		<div id="creator">
+			<form id="page-creator" class="creator" method="post" action="/api/page" hidden>
+				<label for="creator-title">Title</label>
+				<input id="creator-title" type="text" name="title">
+				<label for="creator-content">Content</label>
+				<textarea id="creator-content" name="content"></textarea>
+				<input type="submit" value="Create">
+			</form>
+			<table class="creator" hidden>
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Title</th>
+					</tr>
+				</thead>
+				<tbody id="note-rows">
+				</tbody>
+			</table>
+		</div>
+		<form id="image-creator" method="post" action="/api/image_metadata" hidden>
+			<label for="new_image_title">Title</label>
+			<input id="new_image_title" type="text" name="title">
+			<label for="new_image_data">Data</label>
+			<input id="new_image_data" type="file" name="data">
+			<input type="submit" value="Create">
+		</form>
+		<form id="note-editor" hidden>
+			<label for='note-id'>ID</label>
+			<input id='note-id' name='note-id' type='number' disabled>
+			<label for='note_editor_title'>Title</label>
+			<input id='note_editor_title' name='title' type='text'>
+			<label for='note_editor_reference'>Reference</label>
+			<input id='note_editor_reference' name='reference' type='text'>
+			<label for='note_editor_content'>Content</label>
+			<textarea id='note_editor_content' name='content'></textarea>
+			<label for='note_editor_tag'>Tags</label>
+			<input id='note_editor_tag' name='note-tag' type='text' disabled>
+			<input id='note-create' type='submit' value='Create'>
+			<input id='note-tag-creator' type='submit' value='Tag' hidden>
+		</form>
+	</body>
+</html>
