@@ -29,6 +29,10 @@ class Token {
 		return element;
 	}
 
+	static parseCodeBlock(value) {
+		return value.children[0].toNode();
+	}
+
 	static parseBlockQuote(value) {
 		let element = document.createElement('blockquote');
 		for (const child of value.children) {
@@ -72,6 +76,8 @@ class Token {
 				return Token.parseCode(this);
 			case 'list':
 				return Token.parseList(this);
+			case 'codeblock':
+				return Token.parseCodeBlock(this);
 			case 'blockquote':
 				return Token.parseBlockQuote(this);
 			default:
@@ -136,6 +142,7 @@ function lex(text) {
 	const list_pattern = /^(?<style>\*) (?<text>.+)/;
 	const image_pattern = /^!\[(?<alt>.*)\]\((?<src>.+)\)/;
 	const blockquote_pattern = /^\> (?<text>.+)/;
+	const code_block_pattern = /^( {4}|\t)(?<text>.+)/;
 
 	for (const line of text.split("\n")) {
 		// Headings
@@ -171,6 +178,14 @@ function lex(text) {
 			continue;
 		}
 
+		// Code block
+		match = line.match(code_block_pattern);
+		if (match != null) {
+			let children = [new Token('text', match.groups.text + '\n', null, null, null)];
+			tokens.push(new Token('codeblock', match.groups.text, children, 'PRE', null));
+			continue;
+		}
+
 		// Paragraph
 		if (line !== '') {
 			tokens.push(new Token('paragraph', line, lex_inline(line), 'P', null));
@@ -196,6 +211,7 @@ function parse(tokens) {
 				root.append(token.toNode());
 				break;
 			case 'list':
+			case 'codeblock':
 				if (buffer === null) {
 					buffer = document.createElement(token.tag);
 				}
