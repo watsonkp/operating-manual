@@ -3,8 +3,15 @@ require 'json'
 require 'base64'
 require 'pg'
 require 'sinatra'
+require 'erb'
 
-CONNECTION_STRING = "postgresql://postgres:@manual-db:5432/operating_manual"
+POSTGRES_USER = ENV["PGUSER"]
+POSTGRES_PASSWORD = ERB::Util::url_encode(ENV["PGPASSWORD"])
+POSTGRES_HOST = ENV["PGHOST"]
+POSTGRES_PORT = ENV["PGPORT"]
+POSTGRES_DB = ENV["PGDATABASE"]
+
+CONNECTION_STRING = "postgresql://" + PGUSER + ":" + PGPASSWORD + "@" + PGHOST + ":" + PGPORT + "/" + PDATABASE
 
 set :bind, '0.0.0.0'
 
@@ -19,7 +26,7 @@ def query(s, params, handler)
 	rescue => ex
 		[500, {"Content-Type" => "application/json"}, JSON.generate({"error": "EXCEPTION - query(): #{ex.message}"})]
 	ensure
-		connection.close
+		connection&.close
 	end
 end
 
@@ -34,7 +41,7 @@ def query_binary(s, params, handler)
 	rescue => ex
 		[500, {"Content-Type" => "application/json"}, JSON.generate({"error": "EXCEPTION - query(): #{ex.message}"})]
 	ensure
-		connection.close
+		connection&.close
 	end
 end
 
@@ -237,6 +244,10 @@ post '/api/citation' do
 	page_id = data['page_id']
 	note_id = data['note_id']
 	query("INSERT INTO citation (page_id, note_id) VALUES ($1::int, $2::int) RETURNING *;", [page_id, note_id], Proc.new { |result| handle_create(result, "citation")})
+end
+
+get '/api/*' do
+	[404, {"Content-Type" => "application/json"}, JSON.generate({"error": "Not found"})]
 end
 
 get '/*' do
