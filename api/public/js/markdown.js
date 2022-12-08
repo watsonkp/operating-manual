@@ -33,6 +33,22 @@ class Token {
 		return value.children[0].toNode();
 	}
 
+	static parseFigure(value) {
+		let element = document.createElement('figure');
+		for (const child of value.children) {
+			element.appendChild(child.toNode());
+		}
+		return element;
+	}
+
+	static parseCaption(value) {
+		let element = document.createElement('figcaption');
+		for (const child of value.children) {
+			element.appendChild(child.toNode());
+		}
+		return element;
+	}
+
 	static parseBlockQuote(value) {
 		let element = document.createElement('blockquote');
 		for (const child of value.children) {
@@ -78,8 +94,12 @@ class Token {
 				return Token.parseList(this);
 			case 'codeblock':
 				return Token.parseCodeBlock(this);
+			case 'figure':
+				return Token.parseFigure(this);
 			case 'blockquote':
 				return Token.parseBlockQuote(this);
+			case 'caption':
+				return Token.parseCaption(this);
 			default:
 				return document.createTextNode(this.value);
 		}
@@ -142,7 +162,7 @@ function lex(text) {
 	const list_pattern = /^(?<style>\*) (?<text>.+)/;
 	const ordered_list_pattern = /^(?<style>[0-9]+\.) (?<text>.+)/;
 	const image_pattern = /^!\[(?<alt>.*)\]\((?<src>.+)\)/;
-	const blockquote_pattern = /^\> (?<text>.+)/;
+	const blockquote_pattern = /^\> (?<text>.+) - (?<caption>.+)$/;
 	const code_block_pattern = /^( {4}|\t)(?<text>.+)/;
 
 	for (const line of text.split("\n")) {
@@ -166,8 +186,9 @@ function lex(text) {
 		// Block quote
 		match = line.match(blockquote_pattern);
 		if (match != null) {
-			let children = [new Token('paragraph', match.groups.text, lex_inline(match.groups.text), 'P', null)];
-			tokens.push(new Token('blockquote', null, children, 'BLOCKQUOTE', null));
+			let blockquote = new Token('blockquote', null, [new Token('paragraph', null, lex_inline(match.groups.text), 'P', null)], 'BLOCKQUOTE', null);
+			let caption = new Token('caption', null, [new Token('text', match.groups.caption, null, null, null)], 'FIGCAPTION', null);
+			tokens.push(new Token('figure', null, [blockquote, caption], 'FIGURE', null));
 			continue;
 		}
 
@@ -215,7 +236,7 @@ function parse(tokens) {
 		switch (token.name) {
 			case 'heading':
 			case 'image':
-			case 'blockquote':
+			case 'figure':
 			case 'paragraph':
 				root.append(token.toNode());
 				break;
