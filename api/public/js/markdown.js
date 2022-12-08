@@ -44,6 +44,12 @@ class Token {
 		return link;
 	}
 
+	static parseCode(value) {
+		let element = document.createElement('code');
+		element.appendChild(value.children[0].toNode());
+		return element;
+	}
+
 	static parseImage(value) {
 		let element = document.createElement('img');
 		element.setAttribute('src', value.attributes['src']);
@@ -62,6 +68,8 @@ class Token {
 				return Token.parseLink(this);
 			case 'image':
 				return Token.parseImage(this);
+			case 'code':
+				return Token.parseCode(this);
 			case 'list':
 				return Token.parseList(this);
 			case 'blockquote':
@@ -74,12 +82,18 @@ class Token {
 
 function lex_inline(text) {
 	const anchor_pattern = /\[(?<text>[^\]]*)\]\((?<href>[^\)]+)\)/;
-	const code_pattern = /`.+`/;
+	const code_pattern = /`(?<text>.+)`/;
 	let tokens = [];
 	let i = 0;
 	while (i < text.length) {
-		match = text.substring(i).match(anchor_pattern);
-		if (match != null) {
+		let anchor_match = text.substring(i).match(anchor_pattern);
+		let code_match = text.substring(i).match(code_pattern);
+		// TODO: There must be a better way of doing this. One option is a more complicated regex, but I don't love that idea.
+		//let matches = [anchor_match, code_match].filter(m => m !== null);
+		//let match = matches.sort((a, b) => a.index - b.index).shift();
+
+		if (anchor_match != null && (code_match == null || anchor_match.index < code_match)) {
+			let match = anchor_match;
 			// Add prefix text to match as text node
 			let s = text.substring(i, i + match.index);
 			i += match.index;
@@ -94,18 +108,34 @@ function lex_inline(text) {
 			i += match[0].length;
 			continue;
 		}
-		break;
+
+		if (code_match != null && (anchor_match == null || code_match.index < anchor_match)) {
+			let match = code_match;
+			// Add prefix text to match as text node
+			let s = text.substring(i, i + match.index);
+			i += match.index;
+			if (s != "") {
+				tokens.push(new Token('text', s, null, null, null));
+			}
+
+			let children = [new Token('text', match.groups.text, null, null)];
+			tokens.push(new Token('code', match[0], children, 'code', null));
+			i += match[0].length;
+			continue;
+		}
+
+		tokens.push(new Token('text', text.substring(i), null, null, null));
+		i += text.substring(i).length;
 	}
-	tokens.push(new Token('text', text.substring(i), null, null, null));
 	return tokens;
 }
 
 function lex(text) {
 	let tokens = [];
-	const heading_pattern = /(?<level>#+) (?<text>.+)/;
-	const list_pattern = /(?<style>\*) (?<text>.+)/;
-	const image_pattern = /!\[(?<alt>.*)\]\((?<src>.+)\)/;
-	const blockquote_pattern = /\> (?<text>.+)/;
+	const heading_pattern = /^(?<level>#+) (?<text>.+)/;
+	const list_pattern = /^(?<style>\*) (?<text>.+)/;
+	const image_pattern = /^!\[(?<alt>.*)\]\((?<src>.+)\)/;
+	const blockquote_pattern = /^\> (?<text>.+)/;
 
 	for (const line of text.split("\n")) {
 		// Headings
