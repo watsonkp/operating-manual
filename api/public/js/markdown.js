@@ -140,6 +140,7 @@ function lex(text) {
 	let tokens = [];
 	const heading_pattern = /^(?<level>#+) (?<text>.+)/;
 	const list_pattern = /^(?<style>\*) (?<text>.+)/;
+	const ordered_list_pattern = /^(?<style>[0-9]+\.) (?<text>.+)/;
 	const image_pattern = /^!\[(?<alt>.*)\]\((?<src>.+)\)/;
 	const blockquote_pattern = /^\> (?<text>.+)/;
 	const code_block_pattern = /^( {4}|\t)(?<text>.+)/;
@@ -175,6 +176,14 @@ function lex(text) {
 		if (match != null) {
 			let children = lex_inline(match.groups.text);
 			tokens.push(new Token('list', line, children, 'UL', null));
+			continue;
+		}
+
+		// Ordered list
+		match = line.match(ordered_list_pattern);
+		if (match != null) {
+			let children = lex_inline(match.groups.text);
+			tokens.push(new Token('list', line, children, 'OL', null));
 			continue;
 		}
 
