@@ -5,13 +5,13 @@ require 'pg'
 require 'sinatra'
 require 'erb'
 
-POSTGRES_USER = ENV["PGUSER"]
-POSTGRES_PASSWORD = ERB::Util::url_encode(ENV["PGPASSWORD"])
-POSTGRES_HOST = ENV["PGHOST"]
-POSTGRES_PORT = ENV["PGPORT"]
-POSTGRES_DB = ENV["PGDATABASE"]
+PGUSER = ENV["PGUSER"]
+PGPASSWORD = ERB::Util::url_encode(ENV["PGPASSWORD"])
+PGHOST = ENV["PGHOST"]
+PGPORT = ENV["PGPORT"]
+PGDATABASE = ENV["PGDATABASE"]
 
-CONNECTION_STRING = "postgresql://" + PGUSER + ":" + PGPASSWORD + "@" + PGHOST + ":" + PGPORT + "/" + PDATABASE
+CONNECTION_STRING = "postgresql://" + PGUSER + ":" + PGPASSWORD + "@" + PGHOST + ":" + PGPORT + "/" + PGDATABASE
 
 set :bind, '0.0.0.0'
 
