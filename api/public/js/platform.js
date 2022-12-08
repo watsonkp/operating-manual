@@ -91,7 +91,7 @@ function bindImageData() {
 		let row = document.createElement('tr');
 		let id_cell = document.createElement('td');
 		let anchor = document.createElement('a');
-		anchor.setAttribute('href', `/raw/images?id=${image['id']}`);
+		anchor.setAttribute('href', `/images?id=${image['id']}`);
 		anchor.appendChild(document.createTextNode(image['id']));
 		id_cell.appendChild(anchor);
 		let title_cell = document.createElement('td');
@@ -195,7 +195,7 @@ function bindPageData() {
 		let row = document.createElement('tr');
 		let id_cell = document.createElement('td');
 		let anchor = document.createElement('a');
-		anchor.setAttribute('href', `/raw/pages?id=${page['id']}`);
+		anchor.setAttribute('href', `/pages?id=${page['id']}`);
 		anchor.appendChild(document.createTextNode(page['id']));
 		id_cell.appendChild(anchor);
 		let title_cell = document.createElement('td');
@@ -233,7 +233,7 @@ function bindNoteData() {
 		let row = document.createElement('tr');
 		let id_cell = document.createElement('td');
 		let anchor = document.createElement('a');
-		anchor.setAttribute('href', `/raw/notes?id=${note['id']}`);
+		anchor.setAttribute('href', `/notes?id=${note['id']}`);
 		anchor.appendChild(document.createTextNode(note['id']));
 		id_cell.appendChild(anchor);
 		let title_cell = document.createElement('td');
@@ -354,17 +354,17 @@ function route(url) {
 		}
 	}
 	switch (url.pathname) {
-		case '/raw/':
-		case '/raw/platform.html':
+		case '/':
+		case '/platform.html':
 			STATE['view'] = 'index';
 			break;
-		case '/raw/notes':
+		case '/notes':
 			STATE['view'] = 'note';
 			break;
-		case '/raw/pages':
+		case '/pages':
 			STATE['view'] = 'page';
 			break;
-		case '/raw/images':
+		case '/images':
 			STATE['view'] = 'image';
 			break;
 		default:
