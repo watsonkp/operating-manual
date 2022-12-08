@@ -1,181 +1,152 @@
-//function renderMarkdownLeafNodes(markdown) {
-//	const leaf_pattern = /\[(.*)\]\((.+)\)/g;
-//	let nodes = [];
-//	let matches = markdown.matchAll(leaf_pattern);
-//	let position = 0;
-//	for (const match of matches) {
-//		nodes.push(document.createTextNode(markdown.substring(position, match.index)));
-//		position += match.index;
-//
-//		let anchor = document.createElement('a');
-//		anchor.href = match[2];
-//		if (match[1] === '') {
-//			anchor.appendChild(document.createTextNode(match[2]));
-//		} else {
-//			anchor.appendChild(document.createTextNode(match[1]));
-//		}
-//		nodes.push(anchor);
-//		position += match[0].length;
-//	}
-//	if (position < markdown.length) {
-//		nodes.push(document.createTextNode(markdown.substring(position)));
-//	}
-//	return nodes;
-//}
-
-//function renderMarkdownAsHTML(markdown) {
-//	let lines = markdown.split(/\n(?!\n)/);
-//	let nodes = [];
-//	for (let line of lines) {
-//		// Parse branch nodes
-//		let heading_match = line.match(/^(#+)(.+)/);
-//		if (heading_match) {
-//			let heading = document.createElement(`h${heading_match[1].length}`);
-//			heading.append(...renderMarkdownLeafNodes(heading_match[2]));
-//			nodes.push(heading);
-//			continue
-//		}
-//		if (line.match(/^.+\n$/)) {
-//			let paragraph = document.createElement('p');
-//			paragraph.append(...renderMarkdownLeafNodes(line.trim()));
-//			nodes.push(paragraph);
-//			continue;
-//		}
-//		let image_match = line.match(/!\[(.*)\]\((.+)\)/);
-//		if (image_match) {
-//			let image = document.createElement('img');
-//			image.src = image_match[2];
-//			if (image_match[1].length === 0) {
-//				image.alt = image_match[2];
-//				image.title = image_match[2];
-//			} else {
-//				image.alt = image_match[1];
-//				image.title = image_match[1];
-//			}
-//			nodes.push(image);
-//			continue;
-//		}
-//		nodes.push(document.createTextNode(line));
-//	}
-//	return nodes;
-//}
-
 class Token {
-	constructor(name, value) {
+	constructor(name, value, children, tag, attributes) {
 		this.name = name;
 		this.value = value;
+		this.children = children;
+		this.tag = tag;
+		this.attributes = attributes;
 	}
 
 	static parseHeader(value) {
-		const pattern = /(?<level>#+)\s*(?<text>\S.*)/;
-		let match = value.match(pattern);
-		if (!match) {
-			console.error(`ERROR: tried to parse ${value} as a header`);
-		}
-		let header = document.createElement(`h${match.groups.level.length}`);
-		header.appendChild(document.createTextNode(match.groups.text));
+		let header = document.createElement(value.tag);
+		header.appendChild(value.children[0].toNode());
 		return header;
 	}
 
-	static parseList(value) {
-		const pattern = /(?<style>\*)\s*(?<text>\S+)/;
-		let match = value.match(pattern);
-		if (!match) {
-			console.error(`ERROR: tried to parse ${value} as a list`);
+	static parseParagraph(value) {
+		let element = document.createElement('p');
+		for (const child of value.children) {
+			element.appendChild(child.toNode());
 		}
-		let element = document.createElement('li');
-		element.appendChild(document.createTextNode(match.groups.text));
 		return element;
 	}
 
-	static parseQuote(value) {
-		const pattern = /(?<style>\>)(?<text>.+)/;
-		let match = value.match(pattern);
-		if (!match) {
-			console.error(`ERROR: tried to parse ${value} as a list`);
+	static parseList(value) {
+		let element = document.createElement('li');
+		for (const child of value.children) {
+			element.appendChild(child.toNode());
 		}
-		return document.createTextNode(match.groups.text)
+		return element;
+	}
+
+	static parseBlockQuote(value) {
+		let element = document.createElement('blockquote');
+		for (const child of value.children) {
+			element.appendChild(child.toNode());
+		}
+		return element;
 	}
 
 	static parseLink(value) {
-		const pattern = /\[(?<text>[^\]]*)\]\((?<href>[^\)]+)\)/;
-		let match = value.match(pattern);
-		if (!match) {
-			console.error(`ERROR: tried to parse ${value} as an anchor`);
-		}
 		let link = document.createElement('a');
-		link.setAttribute('href', match.groups.href);
-		if (match.groups.text.length === 0) {
-			link.appendChild(document.createTextNode(match.groups.href));
-		} else {
-			link.appendChild(document.createTextNode(match.groups.text));
-		}
+		link.setAttribute('href', value.attributes['href']);
+		link.appendChild(value.children[0].toNode());
 		return link;
 	}
 
 	static parseImage(value) {
-		const pattern = /!\[(?<alt>.*)\]\((?<src>.+)\)/;
-		let match = value.match(pattern);
-		if (!match) {
-			console.error(`ERROR: tried to parse ${value} as an anchor`);
-		}
 		let element = document.createElement('img');
-		element.setAttribute('src', match.groups.src);
-		if (match.groups.alt.length === 0) {
-			element.setAttribute('alt', match.groups.src);
-			element.setAttribute('title', match.groups.src);
-		} else {
-			element.setAttribute('alt', match.groups.alt);
-			element.setAttribute('title', match.groups.alt);
-		}
+		element.setAttribute('src', value.attributes['src']);
+		element.setAttribute('alt', value.attributes['alt']);
+		element.setAttribute('title', value.attributes['title']);
 		return element;
 	}
 
 	toNode() {
 		switch (this.name) {
+			case 'paragraph':
+				return Token.parseParagraph(this);
 			case 'heading':
-				return Token.parseHeader(this.value);
+				return Token.parseHeader(this);
 			case 'link':
-				return Token.parseLink(this.value);
+				return Token.parseLink(this);
 			case 'image':
-				return Token.parseImage(this.value);
+				return Token.parseImage(this);
 			case 'list':
-				return Token.parseList(this.value);
-			case 'quote':
-				return Token.parseQuote(this.value);
+				return Token.parseList(this);
+			case 'blockquote':
+				return Token.parseBlockQuote(this);
 			default:
 				return document.createTextNode(this.value);
 		}
 	}
 }
 
+function lex_inline(text) {
+	const anchor_pattern = /\[(?<text>[^\]]*)\]\((?<href>[^\)]+)\)/;
+	const code_pattern = /`.+`/;
+	let tokens = [];
+	let i = 0;
+	while (i < text.length) {
+		match = text.substring(i).match(anchor_pattern);
+		if (match != null) {
+			// Add prefix text to match as text node
+			let s = text.substring(i, i + match.index);
+			i += match.index;
+			if (s != "") {
+				tokens.push(new Token('text', s, null, null, null));
+			}
+
+			// Parse and add anchor token
+			let children = [new Token('text', match.groups.text !== '' ? match.groups.text : match.groups.href, null, null, null)];
+			let attributes = {'href': match.groups.href};
+			tokens.push(new Token('link', match[0], children, 'a', attributes));
+			i += match[0].length;
+			continue;
+		}
+		break;
+	}
+	tokens.push(new Token('text', text.substring(i), null, null, null));
+	return tokens;
+}
+
 function lex(text) {
 	let tokens = [];
-	let start = 0;
-	const pattern = /(?<heading>#+.+\n)|(?<image>!\[.*\]\(.+\))|(?<link>\[[^\]]*\]\([^\)]+\))|(?<list>\*.+\n)|(?<quote>\>.+)|(?<end_block>\n+)/g;
-	for (let match of text.matchAll(pattern)) {
-		if (start !== match.index) {
-			tokens.push(new Token('text', text.substring(start, match.index)));
+	const heading_pattern = /(?<level>#+) (?<text>.+)/;
+	const list_pattern = /(?<style>\*) (?<text>.+)/;
+	const image_pattern = /!\[(?<alt>.*)\]\((?<src>.+)\)/;
+	const blockquote_pattern = /\> (?<text>.+)/;
+
+	for (const line of text.split("\n")) {
+		// Headings
+		match = line.match(heading_pattern);
+		if (match != null) {
+			let children = [new Token('text', match.groups.text, null, null, null)];
+			tokens.push(new Token('heading', line, children, `H${match.groups.level.length}`, null));
+			continue;
 		}
-		if (match.groups.heading) {
-			tokens.push(new Token('heading', text.substring(match.index, match.index + match[0].length)));
-		} else if (match.groups.image) {
-			tokens.push(new Token('image', text.substring(match.index, match.index + match[0].length)));
-		} else if (match.groups.link) {
-			tokens.push(new Token('link', text.substring(match.index, match.index + match[0].length)));
-		} else if (match.groups.list) {
-			tokens.push(new Token('list', text.substring(match.index, match.index + match[0].length)));
-		} else if (match.groups.quote) {
-			tokens.push(new Token('quote', text.substring(match.index, match.index + match[0].length)));
-		} else if (match.groups.end_block) {
-			tokens.push(new Token('end_block', text.substring(match.index, match.index + match[0].length)));
-		} else {
-			console.log('ERROR: Unexpected match label');
-			console.error(match);
+
+		// Images
+		match = line.match(image_pattern);
+		if (match != null) {
+			let title = match.groups.alt !== '' ? match.groups.alt : match.groups.src;
+			let attributes = {'src': match.groups.src, 'alt': title, 'title': title};
+			tokens.push(new Token('image', match[0], null, 'IMG', attributes));
+			continue;
 		}
-		start = match.index + match[0].length;
+
+		// Block quote
+		match = line.match(blockquote_pattern);
+		if (match != null) {
+			let children = [new Token('paragraph', match.groups.text, lex_inline(match.groups.text), 'P', null)];
+			tokens.push(new Token('blockquote', null, children, 'BLOCKQUOTE', null));
+			continue;
+		}
+
+		// List
+		match = line.match(list_pattern);
+		if (match != null) {
+			let children = lex_inline(match.groups.text);
+			tokens.push(new Token('list', line, children, 'UL', null));
+			continue;
+		}
+
+		// Paragraph
+		if (line !== '') {
+			tokens.push(new Token('paragraph', line, lex_inline(line), 'P', null));
+			continue;
+		}
 	}
-	tokens.push(new Token('text', text.substring(start)));
 	return tokens;
 }
 
@@ -183,41 +154,20 @@ function parse(tokens) {
 	let root = new DocumentFragment();
 	let buffer = null;
 	for (let token of tokens) {
+		if (buffer !== null && buffer.tagName !== token.tag) {
+			root.append(buffer);
+			buffer = null;
+		}
 		switch (token.name) {
 			case 'heading':
-				root.append(token.toNode());
-				break;
 			case 'image':
+			case 'blockquote':
+			case 'paragraph':
 				root.append(token.toNode());
-				break;
-			case 'link':
-				if (buffer === null) {
-					buffer = document.createElement('p');
-				}
-				buffer.append(token.toNode());
-				break;
-			case 'end_block':
-				if (buffer === null) {
-					break;
-				}
-				root.append(buffer);
-				buffer = null;
-				break;
-			case 'text':
-				if (buffer === null) {
-					buffer = document.createElement('p');
-				}
-				buffer.append(token.toNode());
 				break;
 			case 'list':
 				if (buffer === null) {
-					buffer = document.createElement('ul');
-				}
-				buffer.append(token.toNode());
-				break;
-			case 'quote':
-				if (buffer === null) {
-					buffer = document.createElement('blockquote');
+					buffer = document.createElement(token.tag);
 				}
 				buffer.append(token.toNode());
 				break;
